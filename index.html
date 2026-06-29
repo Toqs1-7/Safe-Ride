@@ -1,0 +1,2374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SafeRide – Student Transport KPK</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary: #0b4f6c;
+            --primary-light: #1a7a9c;
+            --primary-dark: #083a4f;
+            --secondary: #f5a623;
+            --accent: #6c5ce7;
+            --danger: #e74c3c;
+            --success: #27ae60;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --shadow: 0 4px 20px rgba(11, 79, 108, 0.10);
+            --shadow-lg: 0 12px 48px rgba(11, 79, 108, 0.15);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --transition: all 0.25s ease;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            border: none;
+            outline: none;
+        }
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+            outline: none;
+            border: none;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-col {
+            flex-direction: column;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .justify-between {
+            justify-content: space-between;
+        }
+        .justify-center {
+            justify-content: center;
+        }
+        .gap-2 {
+            gap: 8px;
+        }
+        .gap-4 {
+            gap: 16px;
+        }
+        .gap-6 {
+            gap: 24px;
+        }
+        .gap-8 {
+            gap: 32px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .w-full {
+            width: 100%;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .mt-4 {
+            margin-top: 16px;
+        }
+        .mt-6 {
+            margin-top: 24px;
+        }
+        .mb-4 {
+            margin-bottom: 16px;
+        }
+        .mb-6 {
+            margin-bottom: 24px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .badge-primary {
+            background: #e0e7ff;
+            color: #1e3a8a;
+        }
+        .badge-girls {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+        .badge-boys {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .badge-mixed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(11, 79, 108, 0.3);
+        }
+        .btn-secondary {
+            background: var(--secondary);
+            color: #fff;
+        }
+        .btn-secondary:hover {
+            background: #d49a1a;
+            transform: translateY(-2px);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+        .btn-success:hover {
+            background: #1e8449;
+        }
+        .btn-sm {
+            padding: 8px 18px;
+            font-size: 0.85rem;
+        }
+        .btn-lg {
+            padding: 16px 40px;
+            font-size: 1.05rem;
+        }
+        .btn-block {
+            width: 100%;
+        }
+        .card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--gray-200);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: #fff;
+            color: var(--gray-800);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(11, 79, 108, 0.12);
+        }
+        .form-group input[type="file"] {
+            padding: 10px;
+            border: 2px dashed var(--gray-300);
+            background: var(--gray-50);
+            cursor: pointer;
+        }
+        .form-group input[type="file"]:hover {
+            border-color: var(--primary);
+        }
+        /* HEADER */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 74px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        .logo i {
+            font-size: 1.8rem;
+            background: var(--primary);
+            color: #fff;
+            padding: 8px;
+            border-radius: 12px;
+        }
+        .logo span {
+            color: var(--gray-800);
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-links a {
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: var(--transition);
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+        .nav-links a:hover {
+            background: var(--gray-100);
+            color: var(--primary);
+        }
+        .nav-links .btn-primary {
+            color: #fff;
+            padding: 10px 24px;
+        }
+        .nav-links .btn-primary:hover {
+            background: var(--primary-dark);
+            color: #fff;
+        }
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 16px 6px 6px;
+            border-radius: 50px;
+            background: var(--gray-100);
+        }
+        .user-menu .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .user-menu .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+        .user-menu .logout-btn {
+            background: transparent;
+            color: var(--gray-500);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+        .user-menu .logout-btn:hover {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+        .mobile-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--gray-700);
+            background: none;
+            padding: 4px;
+        }
+        /* HERO */
+        .hero {
+            padding: 80px 0 60px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 50%, #f0fdf4 100%);
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+        }
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .hero-content h1 {
+            font-size: 3.2rem;
+            font-weight: 900;
+            line-height: 1.15;
+            color: var(--gray-900);
+        }
+        .hero-content h1 .highlight {
+            color: var(--primary);
+            position: relative;
+        }
+        .hero-content h1 .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            height: 12px;
+            background: rgba(11, 79, 108, 0.15);
+            border-radius: 10px;
+        }
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--gray-600);
+            margin: 20px 0 32px;
+            max-width: 520px;
+            line-height: 1.8;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            margin-top: 40px;
+        }
+        .hero-stats .stat .number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .hero-stats .stat .label {
+            font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+        .hero-image .illustration {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border-radius: var(--radius);
+            padding: 40px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+        .hero-image .illustration i {
+            font-size: 6rem;
+            color: var(--primary);
+            opacity: 0.9;
+        }
+        .hero-image .illustration h3 {
+            margin-top: 16px;
+            font-size: 1.3rem;
+            color: var(--gray-800);
+        }
+        .hero-image .illustration p {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+        }
+        .hero-image .illustration .city-tags {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .hero-image .illustration .city-tags span {
+            background: var(--gray-100);
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        /* FEATURES */
+        .features {
+            padding: 80px 0;
+            background: #fff;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .section-title h2 {
+            font-size: 2.4rem;
+            font-weight: 800;
+        }
+        .section-title p {
+            color: var(--gray-500);
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 30px;
+        }
+        .feature-card {
+            background: var(--gray-50);
+            padding: 32px 24px;
+            border-radius: var(--radius);
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+        .feature-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            background: #fff;
+        }
+        .feature-card .icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 16px;
+        }
+        .feature-card h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .feature-card p {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+            margin-top: 6px;
+        }
+        /* AUTH */
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+        }
+        .auth-card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+        }
+        .auth-card .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .auth-card .auth-header .logo-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--primary);
+        }
+        .auth-card .auth-header .logo-sm i {
+            background: var(--primary);
+            color: #fff;
+            padding: 6px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+        }
+        .auth-card .auth-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-top: 12px;
+        }
+        .auth-card .auth-header p {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+        }
+        .auth-card .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            color: var(--gray-600);
+        }
+        .auth-card .auth-footer a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .auth-card .auth-footer a:hover {
+            text-decoration: underline;
+        }
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .role-selector .role-option {
+            padding: 14px 8px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: #fff;
+        }
+        .role-selector .role-option:hover {
+            border-color: var(--primary-light);
+            background: var(--gray-50);
+        }
+        .role-selector .role-option.active {
+            border-color: var(--primary);
+            background: #dbeafe;
+        }
+        .role-selector .role-option i {
+            font-size: 1.6rem;
+            display: block;
+            margin-bottom: 4px;
+            color: var(--gray-600);
+        }
+        .role-selector .role-option.active i {
+            color: var(--primary);
+        }
+        .role-selector .role-option span {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--gray-700);
+        }
+        .role-selector .role-option.active span {
+            color: var(--primary-dark);
+        }
+        /* DASHBOARD */
+        .dashboard {
+            padding: 30px 0 60px;
+            background: var(--gray-50);
+            min-height: 100vh;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        .dashboard-header p {
+            color: var(--gray-500);
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: #fff;
+            padding: 20px 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: var(--transition);
+            border: 1px solid var(--gray-200);
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+        .stat-card .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .stat-card .stat-icon.blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .stat-card .stat-icon.green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .stat-card .stat-icon.yellow {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .stat-card .stat-icon.purple {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+        .stat-card .stat-info h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .stat-card .stat-info p {
+            color: var(--gray-500);
+            font-size: 0.85rem;
+        }
+        .table-wrap {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 4px;
+            border: 1px solid var(--gray-200);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        table th {
+            background: var(--gray-50);
+            padding: 14px 18px;
+            text-align: left;
+            font-weight: 700;
+            color: var(--gray-600);
+            border-bottom: 2px solid var(--gray-200);
+        }
+        table td {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--gray-100);
+            color: var(--gray-700);
+            vertical-align: middle;
+        }
+        table tr:hover td {
+            background: var(--gray-50);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray-500);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--gray-300);
+            margin-bottom: 12px;
+        }
+        .empty-state h3 {
+            color: var(--gray-700);
+            font-size: 1.2rem;
+        }
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+        .modal {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 36px 40px;
+            max-width: 540px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+        .modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .modal .modal-header h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .modal .modal-header .close-modal {
+            background: var(--gray-100);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray-600);
+            transition: var(--transition);
+        }
+        .modal .modal-header .close-modal:hover {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+        /* TOAST */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+            width: 100%;
+        }
+        .toast {
+            background: #fff;
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            border-left: 5px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+            border: 1px solid var(--gray-200);
+        }
+        .toast.success {
+            border-left-color: var(--success);
+        }
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+        .toast .toast-msg {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+        .toast .toast-close {
+            background: none;
+            border: none;
+            color: var(--gray-400);
+            font-size: 1rem;
+        }
+        /* ANIMATIONS */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        /* DRIVER CARD */
+        .driver-card {
+            background: #fff;
+            border-radius: var(--radius-sm);
+            padding: 18px 20px;
+            border: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: var(--transition);
+            margin-bottom: 12px;
+        }
+        .driver-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+        .driver-card .driver-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .driver-card .driver-info .d-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .driver-card .driver-info .d-details h4 {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .driver-card .driver-info .d-details p {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+        }
+        .driver-card .driver-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .driver-card .driver-badge {
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .driver-card .driver-badge.available {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .driver-card .driver-badge.unavailable {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .filter-tabs .tab {
+            padding: 8px 20px;
+            border-radius: 50px;
+            background: var(--gray-100);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+        .filter-tabs .tab:hover {
+            background: var(--gray-200);
+        }
+        .filter-tabs .tab.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .filter-tabs .tab i {
+            margin-right: 6px;
+        }
+        /* MAP */
+        #trackingMap {
+            height: 320px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--gray-200);
+            margin-top: 12px;
+        }
+        .map-container {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+        .map-container h4 {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .emergency-ride {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #fef2f2;
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--danger);
+        }
+        .emergency-ride a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--danger);
+            font-weight: 600;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 6px 16px;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+        .emergency-ride a:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+        .camera-box {
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            text-align: center;
+            background: var(--gray-50);
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: var(--transition);
+        }
+        .camera-box video {
+            max-width: 100%;
+            border-radius: var(--radius-sm);
+            display: none;
+        }
+        .camera-box .placeholder i {
+            font-size: 3rem;
+            color: var(--gray-400);
+        }
+        .camera-box .placeholder p {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+        .camera-box.captured {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+        .camera-box.captured .placeholder {
+            display: none;
+        }
+        .camera-box.captured video {
+            display: block;
+        }
+        .face-verified {
+            color: var(--success);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .hero-content p {
+                margin-left: auto;
+                margin-right: auto;
+            }
+            .hero-stats {
+                justify-content: center;
+            }
+            .hero-image .illustration {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 74px;
+                left: 0;
+                right: 0;
+                background: #fff;
+                padding: 20px 24px;
+                border-bottom: 1px solid var(--gray-200);
+                box-shadow: var(--shadow);
+                gap: 8px;
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .nav-links a {
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+            }
+            .nav-links .user-menu {
+                width: 100%;
+                justify-content: center;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            .hero-content h1 {
+                font-size: 2.2rem;
+            }
+            .hero {
+                padding: 40px 0;
+                min-height: auto;
+            }
+            .hero-stats {
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+            }
+            .auth-card {
+                padding: 32px 20px;
+            }
+            .role-selector {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal {
+                padding: 24px 18px;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .header .container {
+                height: 64px;
+            }
+        }
+        @media (max-width: 480px) {
+            .role-selector {
+                grid-template-columns: 1fr;
+            }
+            .hero-content h1 {
+                font-size: 1.8rem;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+            .stat-card {
+                padding: 16px;
+            }
+            table th,
+            table td {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header" id="mainHeader">
+        <div class="container">
+            <a href="#" class="logo" id="logoLink">
+                <i class="fas fa-bus"></i>
+                Safe<span>Ride</span>
+            </a>
+            <nav class="nav-links" id="navLinks"></nav>
+            <button class="mobile-toggle" id="mobileToggle"><i class="fas fa-bars"></i></button>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main id="app"></main>
+
+    <!-- MODAL -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <div class="modal-header">
+                <h3 id="modalTitle">Modal</h3>
+                <button class="close-modal" id="modalCloseBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // ================================================================
+        //  DATA LAYER
+        // ================================================================
+        const DB = {
+            get(key, def = []) {
+                try {
+                    const data = localStorage.getItem('safedrive_' + key);
+                    return data ? JSON.parse(data) : def;
+                } catch { return def; }
+            },
+            set(key, val) {
+                localStorage.setItem('safedrive_' + key, JSON.stringify(val));
+            },
+            getUsers() { return this.get('users', []); },
+            setUsers(u) { this.set('users', u); },
+            getDrivers() { return this.get('drivers', []); },
+            setDrivers(d) { this.set('drivers', d); },
+            getBookings() { return this.get('bookings', []); },
+            setBookings(b) { this.set('bookings', b); },
+            getSession() { return this.get('session', null); },
+            setSession(s) { this.set('session', s); },
+            clearSession() { localStorage.removeItem('safedrive_session'); }
+        };
+
+        function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+        function toast(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-triangle-exclamation' };
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.innerHTML = `
+                <i class="fas ${icons[type] || icons.success}" style="color:${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#f5a623'}"></i>
+                <span class="toast-msg">${msg}</span>
+                <button class="toast-close"><i class="fas fa-times"></i></button>
+            `;
+            el.querySelector('.toast-close').addEventListener('click', () => el.remove());
+            container.appendChild(el);
+            setTimeout(() => { if (el.parentNode) el.remove(); }, 4500);
+        }
+
+        function modal(title, bodyHTML, onSave = null) {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalBody').innerHTML = bodyHTML;
+            overlay.classList.remove('hidden');
+            const close = () => overlay.classList.add('hidden');
+            document.getElementById('modalCloseBtn').onclick = close;
+            overlay.onclick = (e) => { if (e.target === overlay) close(); };
+            if (onSave) {
+                const saveBtn = document.getElementById('modalSaveBtn');
+                if (saveBtn) saveBtn.onclick = () => { onSave();
+                    close(); };
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+        }
+
+        // AUTH
+        function getSession() { return DB.getSession(); }
+
+        function getCurrentUser() {
+            const sess = getSession();
+            if (!sess) return null;
+            const users = DB.getUsers();
+            return users.find(u => u.id === sess.userId) || null;
+        }
+
+        function getCurrentDriver() {
+            const user = getCurrentUser();
+            if (!user || user.role !== 'driver') return null;
+            const drivers = DB.getDrivers();
+            return drivers.find(d => d.userId === user.id) || null;
+        }
+
+        function login(email, password) {
+            const users = DB.getUsers();
+            const user = users.find(u => u.email === email && u.password === password);
+            if (!user) { toast('Invalid email or password', 'error'); return false; }
+            DB.setSession({ userId: user.id, role: user.role });
+            toast(`Welcome back, ${user.name}!`);
+            renderApp();
+            return true;
+        }
+
+        function logout() {
+            DB.clearSession();
+            renderApp();
+            toast('Logged out successfully');
+        }
+
+        function register(userData) {
+            const users = DB.getUsers();
+            if (users.find(u => u.email === userData.email)) {
+                toast('Email already registered', 'error');
+                return false;
+            }
+            const newUser = { ...userData, id: uid(), createdAt: new Date().toISOString() };
+            users.push(newUser);
+            DB.setUsers(users);
+
+            if (userData.role === 'driver') {
+                const drivers = DB.getDrivers();
+                drivers.push({
+                    id: uid(),
+                    userId: newUser.id,
+                    name: userData.name,
+                    email: userData.email,
+                    phone: userData.phone || '',
+                    cnicFront: userData.cnicFront || '',
+                    cnicBack: userData.cnicBack || '',
+                    faceVerified: userData.faceVerified || false,
+                    city: userData.city || '',
+                    vehicleType: userData.vehicleType || 'Car',
+                    genderPreference: userData.genderPreference || 'mixed',
+                    available: true,
+                    rating: 0,
+                    completedRides: 0,
+                    lat: 34.0 + Math.random() * 0.5,
+                    lng: 71.5 + Math.random() * 0.5
+                });
+                DB.setDrivers(drivers);
+            }
+
+            DB.setSession({ userId: newUser.id, role: newUser.role });
+            toast('Account created successfully!');
+            renderApp();
+            return true;
+        }
+
+        // RENDER
+        function renderApp() {
+            const app = document.getElementById('app');
+            const session = getSession();
+            const user = getCurrentUser();
+
+            renderNav(session, user);
+
+            if (!session || !user) {
+                app.innerHTML = renderLanding();
+            } else {
+                switch (user.role) {
+                    case 'parent':
+                        app.innerHTML = renderParentDashboard(user);
+                        break;
+                    case 'driver':
+                        app.innerHTML = renderDriverDashboard(user);
+                        break;
+                    case 'admin':
+                        app.innerHTML = renderAdminDashboard(user);
+                        break;
+                    default:
+                        app.innerHTML = renderLanding();
+                }
+            }
+            setTimeout(initMaps, 200);
+        }
+
+        function renderNav(session, user) {
+            const nav = document.getElementById('navLinks');
+            if (!session || !user) {
+                nav.innerHTML = `
+                    <a href="#" data-page="home">Home</a>
+                    <a href="#" data-page="features">Features</a>
+                    <a href="#" data-page="login" class="btn btn-outline btn-sm">Log In</a>
+                    <a href="#" data-page="register" class="btn btn-primary btn-sm">Get Started</a>
+                `;
+                return;
+            }
+            const initial = user.name.charAt(0).toUpperCase();
+            nav.innerHTML = `
+                <div class="user-menu">
+                    <div class="avatar">${initial}</div>
+                    <span class="user-name">${user.name}</span>
+                    <span style="font-size:0.7rem;color:var(--gray-400);font-weight:500;text-transform:capitalize;">${user.role}</span>
+                    <button class="logout-btn" id="navLogoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            `;
+            document.getElementById('navLogoutBtn')?.addEventListener('click', logout);
+        }
+
+        // LANDING (evaluation removed)
+        function renderLanding() {
+            return `
+            <section class="hero">
+                <div class="container">
+                    <div class="hero-content">
+                        <h1>Safe & Reliable <br><span class="highlight">Student Transport</span> in KPK</h1>
+                        <p>Connecting parents with trusted drivers for school & college students in Nowshera, Peshawar, and Charsada. Safe, secure, and gender-specific options with live GPS tracking.</p>
+                        <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                            <a href="#" data-page="register" class="btn btn-primary btn-lg">Get Started <i class="fas fa-arrow-right"></i></a>
+                            <a href="#" data-page="login" class="btn btn-outline btn-lg">Log In</a>
+                        </div>
+                        <div class="hero-stats">
+                            <div class="stat"><div class="number">3+</div><div class="label">Cities</div></div>
+                            <div class="stat"><div class="number">50+</div><div class="label">Active Drivers</div></div>
+                            <div class="stat"><div class="number">200+</div><div class="label">Happy Parents</div></div>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <div class="illustration">
+                            <i class="fas fa-children"></i>
+                            <h3>SafeRide KPK</h3>
+                            <p>Your child's safety is our priority</p>
+                            <div class="city-tags">
+                                <span><i class="fas fa-location-dot"></i> Nowshera</span>
+                                <span><i class="fas fa-location-dot"></i> Peshawar</span>
+                                <span><i class="fas fa-location-dot"></i> Charsada</span>
+                            </div>
+                            <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                                <span class="badge badge-girls"><i class="fas fa-female"></i> Girls Only</span>
+                                <span class="badge badge-boys"><i class="fas fa-male"></i> Boys Only</span>
+                                <span class="badge badge-mixed"><i class="fas fa-people-group"></i> Mixed</span>
+                            </div>
+                            <div style="margin-top:12px;font-size:0.8rem;color:var(--gray-500);">
+                                <i class="fas fa-id-card"></i> CNIC verified drivers &bull; <i class="fas fa-video"></i> Face verification
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="features" id="features">
+                <div class="container">
+                    <div class="section-title">
+                        <h2>Why Choose SafeRide?</h2>
+                        <p>We make student transportation simple, safe, and reliable</p>
+                    </div>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-shield-alt"></i></div>
+                            <h4>Safety First</h4>
+                            <p>Verified drivers with CNIC & face recognition. Live GPS tracking for every ride.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-venus-mars"></i></div>
+                            <h4>Gender Preference</h4>
+                            <p>Choose girls-only, boys-only, or mixed cabs to match your comfort and cultural needs.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-map-pin"></i></div>
+                            <h4>Live GPS Tracking</h4>
+                            <p>Parents can track the driver's location in real-time during the ride.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="icon"><i class="fas fa-hand-holding-heart"></i></div>
+                            <h4>Driver Empowerment</h4>
+                            <p>Helping drivers find customers easily — a fair platform that benefits everyone.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            `;
+        }
+
+        // PARENT DASHBOARD
+        function renderParentDashboard(user) {
+            const bookings = DB.getBookings().filter(b => b.parentId === user.id);
+            const allDrivers = DB.getDrivers();
+            const drivers = allDrivers.filter(d => d.available && d.faceVerified);
+            const active = bookings.filter(b => b.status === 'pending' || b.status === 'accepted').length;
+            const completed = bookings.filter(b => b.status === 'completed').length;
+            const girls = allDrivers.filter(d => d.genderPreference === 'girls-only').length;
+            const boys = allDrivers.filter(d => d.genderPreference === 'boys-only').length;
+            const mixed = allDrivers.filter(d => d.genderPreference === 'mixed').length;
+            const activeRide = bookings.find(b => b.status === 'accepted');
+
+            return `
+            <div class="dashboard">
+                <div class="container">
+                    <div class="dashboard-header">
+                        <div>
+                            <h1>👋 Welcome, ${user.name}</h1>
+                            <p>Find the safest ride for your child in KPK</p>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-primary btn-sm" id="parentBookRide"><i class="fas fa-plus"></i> Book a Ride</button>
+                        </div>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-car"></i></div><div class="stat-info"><h3>${drivers.length}</h3><p>Available Drivers</p></div></div>
+                        <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>${active}</h3><p>Active Rides</p></div></div>
+                        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div><div class="stat-info"><h3>${completed}</h3><p>Completed Rides</p></div></div>
+                        <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-venus-mars"></i></div><div class="stat-info"><h3>${girls}G / ${boys}B / ${mixed}M</h3><p>Girls / Boys / Mixed</p></div></div>
+                    </div>
+
+                    ${activeRide ? renderTrackingMap(activeRide) : ''}
+
+                    <div class="filter-tabs" id="driverFilterTabs">
+                        <button class="tab active" data-filter="all"><i class="fas fa-people-group"></i> All</button>
+                        <button class="tab" data-filter="girls-only"><i class="fas fa-female"></i> Girls Only</button>
+                        <button class="tab" data-filter="boys-only"><i class="fas fa-male"></i> Boys Only</button>
+                        <button class="tab" data-filter="mixed"><i class="fas fa-people-group"></i> Mixed</button>
+                    </div>
+
+                    <div style="margin-bottom:32px;">
+                        <h3 style="font-weight:700;margin-bottom:12px;">🚗 Available Drivers (Verified)</h3>
+                        <div id="driverList">
+                            ${drivers.length === 0 ? '<div class="empty-state"><i class="fas fa-car-side"></i><h3>No verified drivers available</h3></div>' :
+                            drivers.map(d => `
+                                <div class="driver-card" data-gender="${d.genderPreference}">
+                                    <div class="driver-info">
+                                        <div class="d-avatar">${d.name.charAt(0).toUpperCase()}</div>
+                                        <div class="d-details">
+                                            <h4>${d.name} <i class="fas fa-check-circle" style="color:var(--success);font-size:0.8rem;"></i></h4>
+                                            <p><i class="fas fa-location-dot"></i> ${d.city} &bull; ${d.vehicleType} &bull; 
+                                                <span class="badge ${d.genderPreference === 'girls-only' ? 'badge-girls' : d.genderPreference === 'boys-only' ? 'badge-boys' : 'badge-mixed'}">${d.genderPreference}</span>
+                                                <span style="font-size:0.7rem;color:var(--gray-500);"><i class="fas fa-id-card"></i> CNIC verified</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="driver-actions">
+                                        <span class="driver-badge available">Available</span>
+                                        <button class="btn btn-primary btn-sm book-driver-btn" data-driver-id="${d.id}">Book</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="font-weight:700;margin-bottom:12px;">📋 My Bookings</h3>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Student</th><th>Pickup</th><th>Dropoff</th><th>Date</th><th>Preference</th><th>Status</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    ${bookings.length === 0 ? '<tr><td colspan="7" class="text-center text-muted" style="padding:30px;">No bookings yet.</td></tr>' :
+                                    bookings.map(b => {
+                                        const statusColors = { pending: 'badge-warning', accepted: 'badge-info', completed: 'badge-success', cancelled: 'badge-danger' };
+                                        const prefClass = b.genderPreference === 'girls-only' ? 'badge-girls' : b.genderPreference === 'boys-only' ? 'badge-boys' : 'badge-mixed';
+                                        return `<tr>
+                                            <td><strong>${b.studentName}</strong></td>
+                                            <td>${b.pickup}</td>
+                                            <td>${b.dropoff}</td>
+                                            <td>${b.date} ${b.time}</td>
+                                            <td><span class="badge ${prefClass}">${b.genderPreference}</span></td>
+                                            <td><span class="badge ${statusColors[b.status] || 'badge-warning'}">${b.status}</span></td>
+                                            <td>
+                                                ${b.status === 'pending' ? `<button class="btn btn-danger btn-sm cancel-booking-btn" data-booking-id="${b.id}">Cancel</button>` :
+                                                b.status === 'accepted' ? `<span class="text-muted text-sm">Live tracking active</span>` :
+                                                b.status === 'completed' ? `<span class="badge badge-success">Done</span>` : ''}
+                                            </td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        // TRACKING MAP with emergency numbers
+        function renderTrackingMap(ride) {
+            const driver = DB.getDrivers().find(d => d.id === ride.driverId);
+            if (!driver) return '';
+            return `
+            <div class="map-container">
+                <h4><i class="fas fa-satellite-dish" style="color:var(--primary);"></i> Live Tracking — Ride with ${driver.name}</h4>
+                <p class="text-muted text-sm">Driver is on the way. Location updates every 5 seconds.</p>
+                <div id="trackingMap"></div>
+                <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:0.85rem;color:var(--gray-600);">
+                    <span><i class="fas fa-circle" style="color:var(--success);"></i> Live</span>
+                    <span><i class="fas fa-user"></i> Driver: ${driver.name}</span>
+                    <span><i class="fas fa-phone"></i> ${driver.phone || 'N/A'}</span>
+                    <span><i class="fas fa-car"></i> ${driver.vehicleType}</span>
+                </div>
+                <div class="emergency-ride">
+                    <span><i class="fas fa-phone-alt"></i> Emergency:</span>
+                    <a href="tel:15"><i class="fas fa-shield-alt"></i> Police 15</a>
+                    <a href="tel:1122"><i class="fas fa-ambulance"></i> Ambulance 1122</a>
+                    <a href="tel:1122"><i class="fas fa-fire-extinguisher"></i> Rescue 1122</a>
+                    <a href="tel:199"><i class="fas fa-info-circle"></i> Helpline 199</a>
+                </div>
+            </div>
+            `;
+        }
+
+        // MAP INIT
+        let mapInstance = null;
+        let marker = null;
+        let trackingInterval = null;
+
+        function initMaps() {
+            const mapContainer = document.getElementById('trackingMap');
+            if (!mapContainer) {
+                if (trackingInterval) { clearInterval(trackingInterval);
+                    trackingInterval = null; }
+                return;
+            }
+            const user = getCurrentUser();
+            if (!user || user.role !== 'parent') return;
+            const bookings = DB.getBookings().filter(b => b.parentId === user.id && b.status === 'accepted');
+            if (bookings.length === 0) return;
+            const ride = bookings[0];
+            const driver = DB.getDrivers().find(d => d.id === ride.driverId);
+            if (!driver) return;
+
+            if (!mapInstance) {
+                mapInstance = L.map('trackingMap').setView([driver.lat || 34.0, driver.lng || 71.5], 13);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap'
+                }).addTo(mapInstance);
+                marker = L.marker([driver.lat || 34.0, driver.lng || 71.5], { title: 'Driver' }).addTo(mapInstance);
+                marker.bindPopup(`<strong>${driver.name}</strong><br>${driver.vehicleType}`);
+            } else {
+                mapInstance.setView([driver.lat || 34.0, driver.lng || 71.5], 13);
+                if (marker) {
+                    marker.setLatLng([driver.lat || 34.0, driver.lng || 71.5]);
+                } else {
+                    marker = L.marker([driver.lat || 34.0, driver.lng || 71.5]).addTo(mapInstance);
+                }
+            }
+
+            if (trackingInterval) clearInterval(trackingInterval);
+            trackingInterval = setInterval(() => {
+                const drivers = DB.getDrivers();
+                const d = drivers.find(drv => drv.id === driver.id);
+                if (!d) return;
+                const deltaLat = (Math.random() - 0.5) * 0.005;
+                const deltaLng = (Math.random() - 0.5) * 0.005;
+                d.lat = Math.min(34.3, Math.max(33.8, d.lat + deltaLat));
+                d.lng = Math.min(71.8, Math.max(71.2, d.lng + deltaLng));
+                DB.setDrivers(drivers);
+                if (marker) {
+                    marker.setLatLng([d.lat, d.lng]);
+                    mapInstance.panTo([d.lat, d.lng]);
+                }
+            }, 3000);
+        }
+
+        // DRIVER DASHBOARD
+        function renderDriverDashboard(user) {
+            let driver = getCurrentDriver();
+            if (!driver) {
+                const drivers = DB.getDrivers();
+                const newD = {
+                    id: uid(),
+                    userId: user.id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone || '',
+                    cnicFront: user.cnicFront || '',
+                    cnicBack: user.cnicBack || '',
+                    faceVerified: user.faceVerified || false,
+                    city: user.city || '',
+                    vehicleType: 'Car',
+                    genderPreference: user.genderPreference || 'mixed',
+                    available: true,
+                    rating: 0,
+                    completedRides: 0,
+                    lat: 34.0 + Math.random() * 0.5,
+                    lng: 71.5 + Math.random() * 0.5
+                };
+                drivers.push(newD);
+                DB.setDrivers(drivers);
+                driver = newD;
+                toast('Driver profile created!');
+            }
+
+            const bookings = DB.getBookings().filter(b => b.driverId === driver.id);
+            const pending = bookings.filter(b => b.status === 'pending');
+            const accepted = bookings.filter(b => b.status === 'accepted');
+            const completed = bookings.filter(b => b.status === 'completed');
+
+            return `
+            <div class="dashboard">
+                <div class="container">
+                    <div class="dashboard-header">
+                        <div>
+                            <h1>🚗 Welcome, ${user.name}</h1>
+                            <p>Manage your rides and earn with SafeRide</p>
+                        </div>
+                        <div class="actions">
+                            <button class="btn ${driver.available ? 'btn-success' : 'btn-secondary'} btn-sm" id="toggleAvailability">
+                                <i class="fas ${driver.available ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                                ${driver.available ? 'Available' : 'Unavailable'}
+                            </button>
+                            <button class="btn btn-outline btn-sm" id="editDriverProfile"><i class="fas fa-edit"></i> Edit Profile</button>
+                        </div>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>${pending.length}</h3><p>Pending</p></div></div>
+                        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-check"></i></div><div class="stat-info"><h3>${accepted.length}</h3><p>Active</p></div></div>
+                        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-star"></i></div><div class="stat-info"><h3>${driver.rating || 0} ★</h3><p>Rating</p></div></div>
+                        <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-flag-checkered"></i></div><div class="stat-info"><h3>${driver.completedRides || 0}</h3><p>Completed</p></div></div>
+                    </div>
+
+                    <div style="margin-bottom:32px;">
+                        <h3 style="font-weight:700;margin-bottom:12px;">📩 Pending Requests</h3>
+                        ${pending.length === 0 ? '<div class="empty-state"><i class="fas fa-inbox"></i><h3>No pending requests</h3></div>' :
+                        `<div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Student</th><th>Pickup</th><th>Dropoff</th><th>Date</th><th>Preference</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    ${pending.map(b => `
+                                        <tr>
+                                            <td><strong>${b.studentName}</strong></td>
+                                            <td>${b.pickup}</td>
+                                            <td>${b.dropoff}</td>
+                                            <td>${b.date} ${b.time}</td>
+                                            <td><span class="badge badge-primary">${b.genderPreference}</span></td>
+                                            <td>
+                                                <button class="btn btn-success btn-sm accept-booking-btn" data-booking-id="${b.id}"><i class="fas fa-check"></i> Accept</button>
+                                                <button class="btn btn-danger btn-sm reject-booking-btn" data-booking-id="${b.id}"><i class="fas fa-times"></i> Reject</button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>`}
+                    </div>
+
+                    <div>
+                        <h3 style="font-weight:700;margin-bottom:12px;">📋 My Rides</h3>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Student</th><th>Pickup</th><th>Dropoff</th><th>Date</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    ${bookings.filter(b => b.status !== 'pending').length === 0 ? '<tr><td colspan="5" class="text-center text-muted" style="padding:30px;">No rides yet</td></tr>' :
+                                    bookings.filter(b => b.status !== 'pending').map(b => {
+                                        const statusColors = { accepted: 'badge-info', completed: 'badge-success', cancelled: 'badge-danger' };
+                                        return `<tr>
+                                            <td><strong>${b.studentName}</strong></td>
+                                            <td>${b.pickup}</td>
+                                            <td>${b.dropoff}</td>
+                                            <td>${b.date} ${b.time}</td>
+                                            <td><span class="badge ${statusColors[b.status] || 'badge-warning'}">${b.status}</span></td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        // ADMIN DASHBOARD
+        function renderAdminDashboard(user) {
+            const users = DB.getUsers();
+            const drivers = DB.getDrivers();
+            const bookings = DB.getBookings();
+            const totalParents = users.filter(u => u.role === 'parent').length;
+            const totalDrivers = users.filter(u => u.role === 'driver').length;
+            const totalBookings = bookings.length;
+            const pendingBookings = bookings.filter(b => b.status === 'pending').length;
+
+            return `
+            <div class="dashboard">
+                <div class="container">
+                    <div class="dashboard-header">
+                        <div>
+                            <h1>🛡️ Admin Panel</h1>
+                            <p>Manage users, drivers, and bookings across KPK</p>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-primary btn-sm" id="adminAddUser"><i class="fas fa-user-plus"></i> Add User</button>
+                        </div>
+                    </div>
+                    <div class="dashboard-grid">
+                        <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-users"></i></div><div class="stat-info"><h3>${users.length}</h3><p>Total Users</p></div></div>
+                        <div class="stat-card"><div class="stat-icon green"><i class="fas fa-user-tie"></i></div><div class="stat-info"><h3>${totalParents}</h3><p>Parents</p></div></div>
+                        <div class="stat-card"><div class="stat-icon yellow"><i class="fas fa-car"></i></div><div class="stat-info"><h3>${totalDrivers}</h3><p>Drivers</p></div></div>
+                        <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-book"></i></div><div class="stat-info"><h3>${totalBookings}</h3><p>Bookings</p></div></div>
+                        <div class="stat-card"><div class="stat-icon" style="background:#fef3c7;color:#92400e;"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>${pendingBookings}</h3><p>Pending</p></div></div>
+                    </div>
+                    <div style="margin-bottom:32px;">
+                        <h3 style="font-weight:700;margin-bottom:12px;">👤 All Users</h3>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>CNIC</th><th>Face Verified</th><th>Actions</th></tr></thead>
+                                <tbody>
+                                    ${users.length === 0 ? '<tr><td colspan="6" class="text-center text-muted" style="padding:30px;">No users</td></tr>' :
+                                    users.map(u => {
+                                        const driver = drivers.find(d => d.userId === u.id);
+                                        return `<tr>
+                                            <td><strong>${u.name}</strong></td>
+                                            <td>${u.email}</td>
+                                            <td><span class="badge badge-primary">${u.role}</span></td>
+                                            <td>${driver ? (driver.cnicFront ? 'Uploaded' : '—') : '—'}</td>
+                                            <td>${driver ? (driver.faceVerified ? '<i class="fas fa-check-circle" style="color:var(--success);"></i>' : '<i class="fas fa-times-circle" style="color:var(--danger);"></i>') : '—'}</td>
+                                            <td>
+                                                <button class="btn btn-danger btn-sm admin-delete-user" data-user-id="${u.id}"><i class="fas fa-trash"></i></button>
+                                                ${driver && !driver.faceVerified ? `<button class="btn btn-success btn-sm admin-verify-face" data-user-id="${u.id}"><i class="fas fa-video"></i> Verify Face</button>` : ''}
+                                            </td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="font-weight:700;margin-bottom:12px;">📋 All Bookings</h3>
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Student</th><th>Parent</th><th>Driver</th><th>Pickup</th><th>Dropoff</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    ${bookings.length === 0 ? '<tr><td colspan="6" class="text-center text-muted" style="padding:30px;">No bookings</td></tr>' :
+                                    bookings.map(b => {
+                                        const parent = users.find(u => u.id === b.parentId);
+                                        const driver = drivers.find(d => d.id === b.driverId);
+                                        const statusColors = { pending: 'badge-warning', accepted: 'badge-info', completed: 'badge-success', cancelled: 'badge-danger' };
+                                        return `<tr>
+                                            <td><strong>${b.studentName}</strong></td>
+                                            <td>${parent ? parent.name : '—'}</td>
+                                            <td>${driver ? driver.name : '—'}</td>
+                                            <td>${b.pickup}</td>
+                                            <td>${b.dropoff}</td>
+                                            <td><span class="badge ${statusColors[b.status] || 'badge-warning'}">${b.status}</span></td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        // AUTH PAGES
+        function showLogin() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+            <div class="auth-page">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="logo-sm"><i class="fas fa-bus"></i> SafeRide</div>
+                        <h2>Welcome Back</h2>
+                        <p>Log in to your SafeRide account</p>
+                    </div>
+                    <form id="loginForm">
+                        <div class="form-group"><label>Email</label><input id="loginEmail" type="email" placeholder="you@example.com" required /></div>
+                        <div class="form-group"><label>Password</label><input id="loginPassword" type="password" placeholder="••••••••" required /></div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">Log In</button>
+                    </form>
+                    <div class="auth-footer">Don't have an account? <a href="#" data-page="register">Sign up</a></div>
+                </div>
+            </div>
+            `;
+            document.getElementById('loginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                login(document.getElementById('loginEmail').value.trim(), document.getElementById('loginPassword').value.trim());
+            });
+        }
+
+        function showRegister() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+            <div class="auth-page">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <div class="logo-sm"><i class="fas fa-bus"></i> SafeRide</div>
+                        <h2>Get Started</h2>
+                        <p>Create your SafeRide account</p>
+                    </div>
+                    <form id="registerForm">
+                        <div class="form-group"><label>Full Name</label><input id="regName" placeholder="e.g. Ahmed Khan" required /></div>
+                        <div class="form-group"><label>Email</label><input id="regEmail" type="email" placeholder="you@example.com" required /></div>
+                        <div class="form-group"><label>Password</label><input id="regPassword" type="password" placeholder="•••••••• (min 6 chars)" required minlength="6" /></div>
+                        <div class="form-group"><label>Phone (optional)</label><input id="regPhone" placeholder="03XX-XXXXXXX" /></div>
+                        <div class="form-group"><label>City</label>
+                            <select id="regCity">
+                                <option value="Nowshera">Nowshera</option>
+                                <option value="Peshawar">Peshawar</option>
+                                <option value="Charsada">Charsada</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="cnicGroup" style="display:none;">
+                            <label>CNIC Front (image)</label>
+                            <input id="regCnicFront" type="file" accept="image/*" />
+                            <label style="margin-top:8px;">CNIC Back (image)</label>
+                            <input id="regCnicBack" type="file" accept="image/*" />
+                        </div>
+                        <div class="form-group" id="faceGroup" style="display:none;">
+                            <label>Face Verification (for drivers)</label>
+                            <div class="camera-box" id="cameraBox">
+                                <div class="placeholder" id="cameraPlaceholder">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Click "Capture" to take a photo</p>
+                                </div>
+                                <video id="videoElement" autoplay muted></video>
+                                <div id="faceStatus" style="margin-top:8px;"></div>
+                                <button type="button" class="btn btn-primary btn-sm" id="captureFaceBtn"><i class="fas fa-camera"></i> Capture</button>
+                                <button type="button" class="btn btn-outline btn-sm" id="resetFaceBtn" style="display:none;"><i class="fas fa-undo"></i> Reset</button>
+                            </div>
+                        </div>
+                        <div class="form-group"><label>I am a...</label>
+                            <div class="role-selector" id="regRoleSelector">
+                                <div class="role-option active" data-role="parent"><i class="fas fa-user"></i><span>Parent</span></div>
+                                <div class="role-option" data-role="driver"><i class="fas fa-car"></i><span>Driver</span></div>
+                                <div class="role-option" data-role="admin"><i class="fas fa-user-tie"></i><span>Admin</span></div>
+                            </div>
+                        </div>
+                        <div class="form-group" id="regGenderGroup">
+                            <label>Cab Preference</label>
+                            <select id="regGender">
+                                <option value="girls-only">Girls Only</option>
+                                <option value="boys-only">Boys Only</option>
+                                <option value="mixed" selected>Mixed</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="regVehicleGroup" style="display:none;">
+                            <label>Vehicle Type</label>
+                            <input id="regVehicle" placeholder="e.g. Car, Van, Suzuki" value="Car" />
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
+                    </form>
+                    <div class="auth-footer">Already have an account? <a href="#" data-page="login">Log in</a></div>
+                </div>
+            </div>
+            `;
+
+            // Role toggle
+            document.querySelectorAll('#regRoleSelector .role-option').forEach(el => {
+                el.addEventListener('click', () => {
+                    document.querySelectorAll('#regRoleSelector .role-option').forEach(r => r.classList.remove('active'));
+                    el.classList.add('active');
+                    const role = el.dataset.role;
+                    document.getElementById('regVehicleGroup').style.display = role === 'driver' ? 'block' : 'none';
+                    document.getElementById('regGenderGroup').style.display = role === 'admin' ? 'none' : 'block';
+                    document.getElementById('cnicGroup').style.display = role === 'driver' ? 'block' : 'none';
+                    document.getElementById('faceGroup').style.display = role === 'driver' ? 'block' : 'none';
+                    if (role === 'driver' && !stream && !capturedPhoto) startCamera();
+                });
+            });
+
+            // Face capture
+            let stream = null;
+            let capturedPhoto = false;
+
+            async function startCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+                    const video = document.getElementById('videoElement');
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    document.getElementById('cameraPlaceholder').style.display = 'none';
+                    document.getElementById('captureFaceBtn').textContent = '📸 Capture';
+                    document.getElementById('resetFaceBtn').style.display = 'none';
+                } catch (err) {
+                    toast('Camera access denied.', 'error');
+                }
+            }
+
+            document.getElementById('captureFaceBtn').addEventListener('click', async () => {
+                if (!stream) { await startCamera(); return; }
+                const video = document.getElementById('videoElement');
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 320;
+                canvas.height = video.videoHeight || 240;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                sessionStorage.setItem('faceCapture', canvas.toDataURL('image/png'));
+                capturedPhoto = true;
+                document.getElementById('faceStatus').innerHTML = '<span class="face-verified"><i class="fas fa-check-circle"></i> Face captured & verified</span>';
+                document.getElementById('cameraBox').classList.add('captured');
+                document.getElementById('captureFaceBtn').textContent = '✅ Captured';
+                document.getElementById('resetFaceBtn').style.display = 'inline-flex';
+                if (stream) { stream.getTracks().forEach(t => t.stop());
+                    stream = null; }
+                toast('Face verification successful!');
+            });
+
+            document.getElementById('resetFaceBtn').addEventListener('click', () => {
+                capturedPhoto = false;
+                document.getElementById('faceStatus').innerHTML = '';
+                document.getElementById('cameraBox').classList.remove('captured');
+                document.getElementById('captureFaceBtn').textContent = '📸 Capture';
+                document.getElementById('resetFaceBtn').style.display = 'none';
+                sessionStorage.removeItem('faceCapture');
+                startCamera();
+            });
+
+            document.getElementById('registerForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('regName').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const password = document.getElementById('regPassword').value.trim();
+                const phone = document.getElementById('regPhone').value.trim();
+                const city = document.getElementById('regCity').value;
+                const roleEl = document.querySelector('#regRoleSelector .role-option.active');
+                const role = roleEl ? roleEl.dataset.role : 'parent';
+                const genderPreference = document.getElementById('regGender')?.value || 'mixed';
+                const vehicleType = document.getElementById('regVehicle')?.value || 'Car';
+
+                let cnicFront = '',
+                    cnicBack = '';
+                if (role === 'driver') {
+                    const frontFile = document.getElementById('regCnicFront').files[0];
+                    const backFile = document.getElementById('regCnicBack').files[0];
+                    if (!frontFile || !backFile) { toast('Please upload both CNIC front and back images', 'error'); return; }
+                    const reader1 = new FileReader();
+                    const reader2 = new FileReader();
+                    reader1.onload = (e) => { cnicFront = e.target.result;
+                        checkDone(); };
+                    reader2.onload = (e) => { cnicBack = e.target.result;
+                        checkDone(); };
+                    reader1.readAsDataURL(frontFile);
+                    reader2.readAsDataURL(backFile);
+
+                    let done = false;
+
+                    function checkDone() {
+                        if (cnicFront && cnicBack && !done) {
+                            done = true;
+                            proceed();
+                        }
+                    }
+                    // If files already loaded (sync), proceed
+                    setTimeout(() => {
+                        if (!done) {
+                            // if reader didn't trigger (maybe already loaded), we force
+                            if (frontFile && backFile) {
+                                // read again
+                                const r1 = new FileReader();
+                                r1.onload = (e) => { cnicFront = e.target.result;
+                                    checkDone2(); };
+                                r1.readAsDataURL(frontFile);
+                                const r2 = new FileReader();
+                                r2.onload = (e) => { cnicBack = e.target.result;
+                                    checkDone2(); };
+                                r2.readAsDataURL(backFile);
+                                let done2 = false;
+
+                                function checkDone2() {
+                                    if (cnicFront && cnicBack && !done2) {
+                                        done2 = true;
+                                        proceed();
+                                    }
+                                }
+                            }
+                        }
+                    }, 100);
+                    return;
+                } else {
+                    proceed();
+                }
+
+                function proceed() {
+                    if (!name || !email || !password) { toast('Please fill all required fields', 'error'); return; }
+                    if (password.length < 6) { toast('Password must be at least 6 characters', 'error'); return; }
+                    if (role === 'driver' && !capturedPhoto) { toast('Face verification is required for drivers', 'error'); return; }
+
+                    register({
+                        name,
+                        email,
+                        password,
+                        phone,
+                        city,
+                        role,
+                        genderPreference,
+                        vehicleType,
+                        cnicFront,
+                        cnicBack,
+                        faceVerified: capturedPhoto
+                    });
+                }
+            });
+        }
+
+        // BOOK RIDE MODAL
+        function showBookRideModal(driverId = null) {
+            const user = getCurrentUser();
+            if (!user || user.role !== 'parent') { toast('Please login as a parent', 'error'); return; }
+            const drivers = DB.getDrivers().filter(d => d.available && d.faceVerified);
+            let driverOpts = drivers.map(d =>
+                `<option value="${d.id}" ${d.id === driverId ? 'selected' : ''}>${d.name} (${d.city} - ${d.genderPreference})</option>`
+            ).join('');
+            if (!driverOpts) driverOpts = '<option value="">No verified drivers available</option>';
+
+            modal('Book a Ride', `
+                <div class="form-group"><label>Student Name</label><input id="bookStudent" placeholder="e.g. Ali Ahmed" /></div>
+                <div class="form-group"><label>Pickup</label><input id="bookPickup" placeholder="e.g. School Name" /></div>
+                <div class="form-group"><label>Dropoff</label><input id="bookDropoff" placeholder="e.g. Home Address" /></div>
+                <div class="form-group"><label>Date</label><input id="bookDate" type="date" /></div>
+                <div class="form-group"><label>Time</label><input id="bookTime" type="time" /></div>
+                <div class="form-group"><label>Driver</label><select id="bookDriver">${driverOpts}</select></div>
+                <div class="form-group"><label>Gender Preference</label>
+                    <select id="bookGender">
+                        <option value="girls-only">Girls Only</option>
+                        <option value="boys-only">Boys Only</option>
+                        <option value="mixed" selected>Mixed</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-block" id="modalSaveBtn">Book Now</button>
+            `, () => {
+                const studentName = document.getElementById('bookStudent').value.trim();
+                const pickup = document.getElementById('bookPickup').value.trim();
+                const dropoff = document.getElementById('bookDropoff').value.trim();
+                const date = document.getElementById('bookDate').value;
+                const time = document.getElementById('bookTime').value;
+                const driverIdVal = document.getElementById('bookDriver').value;
+                const gender = document.getElementById('bookGender').value;
+                if (!studentName || !pickup || !dropoff || !date || !time) { toast('Please fill all fields', 'error'); return; }
+                if (!driverIdVal) { toast('Please select a driver', 'error'); return; }
+                const bookings = DB.getBookings();
+                bookings.push({ id: uid(), parentId: user.id, driverId: driverIdVal, studentName, pickup, dropoff, date, time,
+                    genderPreference: gender, status: 'pending', createdAt: new Date().toISOString() });
+                DB.setBookings(bookings);
+                toast('Ride booked! Driver will respond.');
+                renderApp();
+            });
+        }
+
+        // EVENT DELEGATION
+        function setupEventDelegation() {
+            document.addEventListener('click', function(e) {
+                // Navigation
+                const navLink = e.target.closest('[data-page]');
+                if (navLink) {
+                    e.preventDefault();
+                    const page = navLink.dataset.page;
+                    if (page === 'home' || page === 'features') renderApp();
+                    else if (page === 'login') showLogin();
+                    else if (page === 'register') showRegister();
+                    return;
+                }
+                if (e.target.closest('#navLogoutBtn')) { logout(); return; }
+                if (e.target.closest('#mobileToggle')) { document.getElementById('navLinks').classList.toggle('open'); return; }
+                if (e.target.closest('#logoLink')) { e.preventDefault();
+                    renderApp(); return; }
+                if (e.target.closest('#parentBookRide')) { showBookRideModal(); return; }
+                const bookBtn = e.target.closest('.book-driver-btn');
+                if (bookBtn) { showBookRideModal(bookBtn.dataset.driverId); return; }
+                const cancelBtn = e.target.closest('.cancel-booking-btn');
+                if (cancelBtn) {
+                    const id = cancelBtn.dataset.bookingId;
+                    if (confirm('Cancel this booking?')) {
+                        const bookings = DB.getBookings();
+                        const b = bookings.find(bb => bb.id === id);
+                        if (b) { b.status = 'cancelled';
+                            DB.setBookings(bookings);
+                            toast('Booking cancelled');
+                            renderApp(); }
+                    }
+                    return;
+                }
+                const filterTab = e.target.closest('#driverFilterTabs .tab');
+                if (filterTab) {
+                    document.querySelectorAll('#driverFilterTabs .tab').forEach(t => t.classList.remove('active'));
+                    filterTab.classList.add('active');
+                    const filter = filterTab.dataset.filter;
+                    document.querySelectorAll('#driverList .driver-card').forEach(card => {
+                        if (filter === 'all') card.style.display = 'flex';
+                        else card.style.display = card.dataset.gender === filter ? 'flex' : 'none';
+                    });
+                    return;
+                }
+                if (e.target.closest('#toggleAvailability')) {
+                    const driver = getCurrentDriver();
+                    if (!driver) return;
+                    const drivers = DB.getDrivers();
+                    const d = drivers.find(dr => dr.id === driver.id);
+                    if (d) { d.available = !d.available;
+                        DB.setDrivers(drivers);
+                        toast(`You are now ${d.available ? 'available' : 'unavailable'}`);
+                        renderApp(); }
+                    return;
+                }
+                if (e.target.closest('#editDriverProfile')) {
+                    const driver = getCurrentDriver();
+                    if (!driver) return;
+                    modal('Edit Profile', `
+                        <div class="form-group"><label>Name</label><input id="editDName" value="${driver.name}" /></div>
+                        <div class="form-group"><label>Phone</label><input id="editDPhone" value="${driver.phone || ''}" /></div>
+                        <div class="form-group"><label>City</label><select id="editDCity"><option value="Nowshera" ${driver.city==='Nowshera'?'selected':''}>Nowshera</option><option value="Peshawar" ${driver.city==='Peshawar'?'selected':''}>Peshawar</option><option value="Charsada" ${driver.city==='Charsada'?'selected':''}>Charsada</option></select></div>
+                        <div class="form-group"><label>Vehicle</label><input id="editDVehicle" value="${driver.vehicleType}" /></div>
+                        <div class="form-group"><label>Preference</label><select id="editDGender"><option value="girls-only" ${driver.genderPreference==='girls-only'?'selected':''}>Girls Only</option><option value="boys-only" ${driver.genderPreference==='boys-only'?'selected':''}>Boys Only</option><option value="mixed" ${driver.genderPreference==='mixed'?'selected':''}>Mixed</option></select></div>
+                        <button class="btn btn-primary btn-block" id="modalSaveBtn">Save</button>
+                    `, () => {
+                        const drivers = DB.getDrivers();
+                        const d = drivers.find(dr => dr.id === driver.id);
+                        if (d) {
+                            d.name = document.getElementById('editDName').value;
+                            d.phone = document.getElementById('editDPhone').value;
+                            d.city = document.getElementById('editDCity').value;
+                            d.vehicleType = document.getElementById('editDVehicle').value;
+                            d.genderPreference = document.getElementById('editDGender').value;
+                            DB.setDrivers(drivers);
+                            const users = DB.getUsers();
+                            const u = users.find(usr => usr.id === d.userId);
+                            if (u) { u.name = d.name;
+                                u.phone = d.phone;
+                                u.city = d.city;
+                                u.genderPreference = d.genderPreference;
+                                DB.setUsers(users); }
+                            toast('Profile updated');
+                            renderApp();
+                        }
+                    });
+                    return;
+                }
+                const acceptBtn = e.target.closest('.accept-booking-btn');
+                if (acceptBtn) {
+                    const id = acceptBtn.dataset.bookingId;
+                    const bookings = DB.getBookings();
+                    const b = bookings.find(bb => bb.id === id);
+                    if (b) { b.status = 'accepted';
+                        DB.setBookings(bookings);
+                        toast('Ride accepted! GPS tracking started.');
+                        renderApp(); }
+                    return;
+                }
+                const rejectBtn = e.target.closest('.reject-booking-btn');
+                if (rejectBtn) {
+                    const id = rejectBtn.dataset.bookingId;
+                    if (confirm('Reject this ride?')) {
+                        const bookings = DB.getBookings();
+                        const b = bookings.find(bb => bb.id === id);
+                        if (b) { b.status = 'cancelled';
+                            DB.setBookings(bookings);
+                            toast('Ride rejected');
+                            renderApp(); }
+                    }
+                    return;
+                }
+                if (e.target.closest('#adminAddUser')) {
+                    modal('Add User', `
+                        <div class="form-group"><label>Name</label><input id="adminUserName" /></div>
+                        <div class="form-group"><label>Email</label><input id="adminUserEmail" type="email" /></div>
+                        <div class="form-group"><label>Password</label><input id="adminUserPass" type="password" /></div>
+                        <div class="form-group"><label>Role</label><select id="adminUserRole"><option value="parent">Parent</option><option value="driver">Driver</option><option value="admin">Admin</option></select></div>
+                        <div class="form-group"><label>City</label><select id="adminUserCity"><option value="Nowshera">Nowshera</option><option value="Peshawar">Peshawar</option><option value="Charsada">Charsada</option></select></div>
+                        <button class="btn btn-primary btn-block" id="modalSaveBtn">Create</button>
+                    `, () => {
+                        const name = document.getElementById('adminUserName').value.trim();
+                        const email = document.getElementById('adminUserEmail').value.trim();
+                        const password = document.getElementById('adminUserPass').value.trim();
+                        const role = document.getElementById('adminUserRole').value;
+                        const city = document.getElementById('adminUserCity').value;
+                        if (!name || !email || !password) { toast('Fill all fields', 'error'); return; }
+                        const users = DB.getUsers();
+                        if (users.find(u => u.email === email)) { toast('Email exists', 'error'); return; }
+                        const newUser = { id: uid(), name, email, password, role, phone: '', city, genderPreference: 'mixed',
+                            createdAt: new Date().toISOString() };
+                        users.push(newUser);
+                        DB.setUsers(users);
+                        if (role === 'driver') {
+                            const drivers = DB.getDrivers();
+                            drivers.push({ id: uid(), userId: newUser.id, name, email, phone: '', cnicFront: '', cnicBack: '',
+                                faceVerified: false, city, vehicleType: 'Car', genderPreference: 'mixed', available: true,
+                                rating: 0, completedRides: 0, lat: 34.0, lng: 71.5 });
+                            DB.setDrivers(drivers);
+                        }
+                        toast('User created');
+                        renderApp();
+                    });
+                    return;
+                }
+                const delBtn = e.target.closest('.admin-delete-user');
+                if (delBtn) {
+                    const id = delBtn.dataset.userId;
+                    if (!confirm('Delete user?')) return;
+                    let users = DB.getUsers();
+                    users = users.filter(u => u.id !== id);
+                    DB.setUsers(users);
+                    let drivers = DB.getDrivers();
+                    drivers = drivers.filter(d => d.userId !== id);
+                    DB.setDrivers(drivers);
+                    toast('User deleted');
+                    renderApp();
+                    return;
+                }
+                const verifyBtn = e.target.closest('.admin-verify-face');
+                if (verifyBtn) {
+                    const userId = verifyBtn.dataset.userId;
+                    const drivers = DB.getDrivers();
+                    const d = drivers.find(drv => drv.userId === userId);
+                    if (d) { d.faceVerified = true;
+                        DB.setDrivers(drivers);
+                        toast('Face verified');
+                        renderApp(); }
+                    return;
+                }
+                if (e.target.closest('#modalOverlay') && !e.target.closest('.modal')) closeModal();
+                if (e.target.closest('#modalCloseBtn')) closeModal();
+            });
+        }
+
+        // SEED
+        function seedData() {
+            if (DB.getUsers().length === 0) {
+                const admin = { id: 'admin1', name: 'Admin KPK', email: 'admin@safedrive.pk', password: 'admin123', role: 'admin',
+                    phone: '0300-0000000', city: 'Peshawar', genderPreference: 'mixed', createdAt: new Date().toISOString() };
+                const parent = { id: 'parent1', name: 'Ali Khan', email: 'ali@safedrive.pk', password: 'parent123',
+                    role: 'parent', phone: '0301-1111111', city: 'Nowshera', genderPreference: 'mixed',
+                    createdAt: new Date().toISOString() };
+                const driverUser = { id: 'driver1', name: 'Usman Malik', email: 'usman@safedrive.pk', password: 'driver123',
+                    role: 'driver', phone: '0302-2222222', city: 'Peshawar', genderPreference: 'mixed',
+                    createdAt: new Date().toISOString() };
+                DB.setUsers([admin, parent, driverUser]);
+                DB.setDrivers([{
+                    id: 'd1',
+                    userId: 'driver1',
+                    name: 'Usman Malik',
+                    email: 'usman@safedrive.pk',
+                    phone: '0302-2222222',
+                    cnicFront: 'data:image/png;base64,',
+                    cnicBack: 'data:image/png;base64,',
+                    faceVerified: true,
+                    city: 'Peshawar',
+                    vehicleType: 'Toyota Corolla',
+                    genderPreference: 'mixed',
+                    available: true,
+                    rating: 4.8,
+                    completedRides: 12,
+                    lat: 34.01,
+                    lng: 71.56
+                }, {
+                    id: 'd2',
+                    userId: 'driver2',
+                    name: 'Sara Ahmed',
+                    email: 'sara@safedrive.pk',
+                    phone: '0303-3333333',
+                    cnicFront: 'data:image/png;base64,',
+                    cnicBack: 'data:image/png;base64,',
+                    faceVerified: true,
+                    city: 'Charsada',
+                    vehicleType: 'Suzuki Alto',
+                    genderPreference: 'girls-only',
+                    available: true,
+                    rating: 4.9,
+                    completedRides: 8,
+                    lat: 34.03,
+                    lng: 71.62
+                }, {
+                    id: 'd3',
+                    userId: 'driver3',
+                    name: 'Bilal Shah',
+                    email: 'bilal@safedrive.pk',
+                    phone: '0304-4444444',
+                    cnicFront: 'data:image/png;base64,',
+                    cnicBack: 'data:image/png;base64,',
+                    faceVerified: true,
+                    city: 'Nowshera',
+                    vehicleType: 'Honda Civic',
+                    genderPreference: 'boys-only',
+                    available: true,
+                    rating: 4.5,
+                    completedRides: 6,
+                    lat: 34.02,
+                    lng: 71.58
+                }]);
+                DB.setBookings([{
+                    id: 'b1',
+                    parentId: 'parent1',
+                    driverId: 'd1',
+                    studentName: 'Ayesha Khan',
+                    pickup: 'Peshawar Model School',
+                    dropoff: 'University Town, Peshawar',
+                    date: '2026-06-30',
+                    time: '14:30',
+                    genderPreference: 'mixed',
+                    status: 'pending',
+                    createdAt: new Date().toISOString()
+                }, {
+                    id: 'b2',
+                    parentId: 'parent1',
+                    driverId: 'd2',
+                    studentName: 'Fatima Ali',
+                    pickup: 'Charsada Girls College',
+                    dropoff: 'Charsada City Center',
+                    date: '2026-06-29',
+                    time: '08:00',
+                    genderPreference: 'girls-only',
+                    status: 'accepted',
+                    createdAt: new Date().toISOString()
+                }]);
+            }
+        }
+
+        // INIT
+        seedData();
+        setupEventDelegation();
+        renderApp();
+
+        console.log('🚀 SafeRide KPK — Professional Edition');
+        console.log('👤 Demo: admin@safedrive.pk / admin123, ali@safedrive.pk / parent123, usman@safedrive.pk / driver123');
+        console.log('✅ CNIC upload (front/back), face capture, live GPS, emergency numbers during rides.');
+    </script>
+</body>
+</html>
